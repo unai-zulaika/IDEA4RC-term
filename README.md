@@ -29,21 +29,31 @@ Fuzy string matching.
 
 - Just install requirements (check end of file)
 - Run `DM_codes_extraction` for obtaining the term_to_code.json. This step can be replaced for any other dictionaries.
-- Run `main`
+- Run `demo.py` for a demo
 
 ```python
-from term_matcher.matcher import load_term_to_code, match_terms
+from term_matcher import load_term_to_code, match_terms
 
 # Load term-to-code mappings
-term_to_code = load_term_to_code("term_to_code.json")
+term_to_code = load_term_to_code("dictionaries/term_to_code.json") # if working with term to code
 
 # Input text
 text = "The patient with angiomyxoma and carcinoma was diagnosed."
 
 # Match terms to codes
-matched_codes = match_terms(text, term_to_code)
+matched_codes, matched_terms = match_terms(text, term_to_code, threshold=50)
 
-print(matched_codes)  # Output: ['C01', 'C02']
+# Output matched codes
+print("Matched Codes:", matched_codes)
+# Optionally, output matched terms for debugging
+print("Matched Terms:", matched_terms)
+```
+
+Output:
+
+```
+Matched Codes: [4239956, 4233949, 4175678, 4164740, 4206785, 4224593, 37156145, 4241843, 4029680, 4022895]
+Matched Terms: ['Angiomyxoma', 'Verrucous carcinoma', 'Giant cell carcinoma', 'Acinar cell carcinoma', 'Schneiderian carcinoma', 'Juvenile carcinoma of the breast', 'Squamous cell carcinoma', 'Adenosquamous carcinoma', 'Myoepithelial carcinoma', 'Adenoid cystic carcinoma']
 ```
 
 ## Improvements
