@@ -129,10 +129,15 @@ def match_terms_variable_names(
             ]  # suboptimal
             if isinstance(code, list):
                 matched_codes.extend(code)
-                matched_vnames.extend(code_to_term_variable[code]["variable_name"])
+                matched_vnames.extend(
+                    code_to_term_variable[code]["variable_name"])
+                matched_vnames.extend(code_to_term_variable[code]["entity"])
             else:
                 matched_codes.append(code)
-                matched_vnames.append(code_to_term_variable[code]["variable_name"])
+                matched_vnames.append(
+                    code_to_term_variable[code]["variable_name"])
+                matched_vnames.append(
+                    code_to_term_variable[code]["entity"])
 
             key = " ".join(match_words)
             if key not in matched_json:
@@ -141,6 +146,7 @@ def match_terms_variable_names(
                 {
                     "score": score,
                     "variable_name": code_to_term_variable[code]["variable_name"],
+                    "entity": code_to_term_variable[code]["entity"],
                     "term": match_term,
                     "code": code,
                 }

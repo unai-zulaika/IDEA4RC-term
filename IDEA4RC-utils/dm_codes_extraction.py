@@ -22,8 +22,9 @@ id_variable_term = {}
 for index, sheet_number in enumerate(tqdm(SHEETS_TO_PROCESS)):
     # read each sheet
     dataframe = pd.read_excel(xls, sheet_name=sheet_number)
-    for vname, terms, entity in dataframe[
-        ["Variable Name (EURACAN file)", "Vocabulary", "ObjectClass"]
+    for vname, terms, entity, description, object_property in dataframe[
+        ["ObjectPropertyLabelEN", "Vocabulary",
+         "ObjectClass", "DataElementConceptDefEN", "ObjectProperty"]
     ].itertuples(index=False):
         for line in str(terms).splitlines():
             # Regular expression to match the format
@@ -31,18 +32,27 @@ for index, sheet_number in enumerate(tqdm(SHEETS_TO_PROCESS)):
 
             # Match the pattern
             match = re.match(pattern, line)
-
+            if entity == "HistologySubGroup":
+                entity = "Diagnosis"
+                vname = "Histology"
+            if entity == "Subsite":
+                entity = "Diagnosis"
+                vname = "Topography"
             # Check if the match was successful
             if match:
                 text = match.group(
                     "text"
                 ).strip()  # Extract and strip any leading/trailing whitespace
-                number = int(match.group("number"))  # Convert the number to an integer
+                # Convert the number to an integer
+                number = int(match.group("number"))
                 result_dict[text] = number  # Add to dictionary
-                id_variable_term[number] = {
+                key = entity + "_" + object_property + "_" + text
+                id_variable_term[key] = {
                     "variable_name": vname,
                     "term": text,
                     "entity": entity,
+                    "description": description,
+                    "code": number,
                 }
 
 
