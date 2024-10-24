@@ -99,9 +99,13 @@ def match_terms_variable_names(
     processed_text = preprocess_text(text)
 
     # Create a dictionary with preprocessed terms
+    # terms = {
+    #     preprocess_text(code_to_term_variable[match["code"]]["term"]): match
+    #     for match in code_to_term_variable.values()
+    # }
     terms = {
-        preprocess_text(code_to_term_variable[code]["term"]): code
-        for code in code_to_term_variable.keys()
+        preprocess_text(code_to_term_variable[key]["term"]): values["code"]
+        for key, values in code_to_term_variable.items()
     }
 
     # Perform fuzzy matching
@@ -118,7 +122,7 @@ def match_terms_variable_names(
 
             matched_terms_list.append(match_term)
             # code = code_to_term_variable[original_term]
-            code = list(
+            code_keys = list(
                 filter(
                     lambda x: preprocess_text(code_to_term_variable[x]["term"])
                     == match_term,
@@ -127,17 +131,24 @@ def match_terms_variable_names(
             )[
                 0
             ]  # suboptimal
-            if isinstance(code, list):
+
+            if isinstance(code_keys, list):
+                code = [code_to_term_variable[match]["code"]
+                        for match in code_keys]
                 matched_codes.extend(code)
                 matched_vnames.extend(
-                    code_to_term_variable[code]["variable_name"])
-                matched_vnames.extend(code_to_term_variable[code]["entity"])
+                    code_to_term_variable[code_keys]["variable_name"])
+                matched_vnames.extend(
+                    code_to_term_variable[code_keys]["entity"])
             else:
+                print(code_keys)
+                print(code_to_term_variable[code_keys])
+                code = code_to_term_variable[code_keys]["code"]
                 matched_codes.append(code)
                 matched_vnames.append(
-                    code_to_term_variable[code]["variable_name"])
+                    code_to_term_variable[code_keys]["variable_name"])
                 matched_vnames.append(
-                    code_to_term_variable[code]["entity"])
+                    code_to_term_variable[code_keys]["entity"])
 
             key = " ".join(match_words)
             if key not in matched_json:
@@ -145,8 +156,8 @@ def match_terms_variable_names(
             matched_json[key].append(
                 {
                     "score": score,
-                    "variable_name": code_to_term_variable[code]["variable_name"],
-                    "entity": code_to_term_variable[code]["entity"],
+                    "variable_name": code_to_term_variable[code_keys]["variable_name"],
+                    "entity": code_to_term_variable[code_keys]["entity"],
                     "term": match_term,
                     "code": code,
                 }
