@@ -3,6 +3,15 @@ from rapidfuzz import process, fuzz, utils
 from typing import List, Dict, Union
 from tqdm import tqdm
 import re
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+
+
+nltk.download("stopwords")
+nltk.download("punkt")
+stop_words = set(stopwords.words("english"))
+print(stop_words)
 
 
 def load_term_to_code(file_path: str) -> Dict[str, Union[str, List[str]]]:
@@ -17,6 +26,20 @@ def load_term_to_code(file_path: str) -> Dict[str, Union[str, List[str]]]:
     """
     with open(file_path, "r") as file:
         return json.load(file)
+
+
+def filter_label(label):
+    label = utils.default_process(label)
+    word_tokens = word_tokenize(label)
+    # converts the words in word_tokens to lower case and then checks whether
+    # they are present in stop_words or not
+    filtered_sentence = [w for w in word_tokens if not w.lower() in stop_words]
+    # with no lower case conversion
+    filtered_sentence = []
+    for w in word_tokens:
+        if w not in stop_words:
+            filtered_sentence.append(w)
+    return " ".join(filtered_sentence)
 
 
 def preprocess_text(text: str) -> str:
@@ -52,12 +75,14 @@ def match_terms(
     processed_text = preprocess_text(text)
 
     # Create a dictionary with preprocessed terms
-    terms = {preprocess_text(term): term for term in term_to_code.keys()}
-
+    terms = {filter_label(preprocess_text(term)): term for term in term_to_code.keys()}
+    print(processed_text)
+    print("KEKE")
     # Perform fuzzy matching
     matches = process.extract(
         processed_text, terms.keys(), scorer=fuzz.token_set_ratio, limit=10
     )
+    print(matches)
 
     # Iterate over matches and add matching codes
     for match_term, score, _ in tqdm(matches):
@@ -104,14 +129,20 @@ def match_terms_variable_names(
     #     for match in code_to_term_variable.values()
     # }
     terms = {
-        preprocess_text(code_to_term_variable[key]["term"]): values["code"]
+        filter_label(code_to_term_variable[key]["term"]): values["code"]
         for key, values in code_to_term_variable.items()
     }
 
+    filtered_terms = [filter_label(term) for term in terms.keys()]
     # Perform fuzzy matching
     matches = process.extract(
-        processed_text, terms.keys(), scorer=fuzz.token_set_ratio, limit=10
+        processed_text,
+        # filter_label(terms.keys()),
+        filtered_terms,
+        scorer=fuzz.token_set_ratio,
+        limit=10,
     )
+
     processed_text_words = set(processed_text.lower().split())
 
     # Iterate over matches and add matching codes
@@ -121,34 +152,32 @@ def match_terms_variable_names(
             match_words = processed_text_words.intersection(matched_term_words)
 
             matched_terms_list.append(match_term)
-            # code = code_to_term_variable[original_term]
-            code_keys = list(
-                filter(
-                    lambda x: preprocess_text(code_to_term_variable[x]["term"])
-                    == match_term,
-                    code_to_term_variable,
-                )
-            )[
-                0
-            ]  # suboptimal
+
+            code_keys = []  # Initialize an empty list to store matching keys
+
+            # Iterate over the keys in code_to_term_variable
+            for x in code_to_term_variable:
+                # Check if the preprocessed term matches the match_term
+                if filter_label(code_to_term_variable[x]["term"]) == match_term:
+                    code_keys.append(x)  # Add the matching key to the list
+                    break  # Exit the loop after finding the first match
+
+            # If code_keys is not empty, the first match will be at index 0
+            if code_keys:
+                code_keys = code_keys[0]  # Get the first matching key
+            else:
+                code_keys = None  # Handle the case where there are no matches
 
             if isinstance(code_keys, list):
-                code = [code_to_term_variable[match]["code"]
-                        for match in code_keys]
+                code = [code_to_term_variable[match]["code"] for match in code_keys]
                 matched_codes.extend(code)
-                matched_vnames.extend(
-                    code_to_term_variable[code_keys]["variable_name"])
-                matched_vnames.extend(
-                    code_to_term_variable[code_keys]["entity"])
+                matched_vnames.extend(code_to_term_variable[code_keys]["variable_name"])
+                matched_vnames.extend(code_to_term_variable[code_keys]["entity"])
             else:
-                print(code_keys)
-                print(code_to_term_variable[code_keys])
                 code = code_to_term_variable[code_keys]["code"]
                 matched_codes.append(code)
-                matched_vnames.append(
-                    code_to_term_variable[code_keys]["variable_name"])
-                matched_vnames.append(
-                    code_to_term_variable[code_keys]["entity"])
+                matched_vnames.append(code_to_term_variable[code_keys]["variable_name"])
+                matched_vnames.append(code_to_term_variable[code_keys]["entity"])
 
             key = " ".join(match_words)
             if key not in matched_json:
