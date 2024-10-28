@@ -10,6 +10,7 @@ from nltk.corpus import stopwords
 
 nltk.download("stopwords")
 nltk.download("punkt")
+
 stop_words = set(stopwords.words("english"))
 print(stop_words)
 
@@ -75,7 +76,7 @@ def match_terms(
     processed_text = preprocess_text(text)
 
     # Create a dictionary with preprocessed terms
-    terms = {filter_label(preprocess_text(term)): term for term in term_to_code.keys()}
+    terms = {filter_label(preprocess_text(term))             : term for term in term_to_code.keys()}
     print(processed_text)
     print("KEKE")
     # Perform fuzzy matching
@@ -169,15 +170,20 @@ def match_terms_variable_names(
                 code_keys = None  # Handle the case where there are no matches
 
             if isinstance(code_keys, list):
-                code = [code_to_term_variable[match]["code"] for match in code_keys]
+                code = [code_to_term_variable[match]["code"]
+                        for match in code_keys]
                 matched_codes.extend(code)
-                matched_vnames.extend(code_to_term_variable[code_keys]["variable_name"])
-                matched_vnames.extend(code_to_term_variable[code_keys]["entity"])
+                matched_vnames.extend(
+                    code_to_term_variable[code_keys]["variable_name"])
+                matched_vnames.extend(
+                    code_to_term_variable[code_keys]["entity"])
             else:
                 code = code_to_term_variable[code_keys]["code"]
                 matched_codes.append(code)
-                matched_vnames.append(code_to_term_variable[code_keys]["variable_name"])
-                matched_vnames.append(code_to_term_variable[code_keys]["entity"])
+                matched_vnames.append(
+                    code_to_term_variable[code_keys]["variable_name"])
+                matched_vnames.append(
+                    code_to_term_variable[code_keys]["entity"])
 
             key = " ".join(match_words)
             if key not in matched_json:

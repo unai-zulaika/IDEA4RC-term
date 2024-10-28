@@ -2,10 +2,13 @@ from setuptools import setup, find_packages
 
 setup(
     name='term_matcher',  # Name of your package
-    version='0.1',        # Initial version
-    description='A library for fuzzy matching terms in text with corresponding codes.',  # Short description
-    long_description=open('README.md').read(),  # Long description from README.md
-    long_description_content_type='text/markdown',  # Specifies the format of long description
+    version='0.2',        # Initial version
+    # Short description
+    description='A library for fuzzy matching terms in text with corresponding codes.',
+    # Long description from README.md
+    long_description=open('README.md').read(),
+    # Specifies the format of long description
+    long_description_content_type='text/markdown',
     author='Unai Zulaika',  # Author's name
     author_email='unai.zulaika@deusto.es',  # Author's email
     url='https://github.com/unai-zulaika/term_matcher',  # URL to the repository
