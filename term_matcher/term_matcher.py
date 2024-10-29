@@ -7,12 +7,15 @@ import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 
+try:
+    print("Downloading NLTK resources...")
+    nltk.download("stopwords")
+    nltk.download("punkt")
 
-nltk.download("stopwords")
-nltk.download("punkt")
+except:
+    pass
 
 stop_words = set(stopwords.words("english"))
-print(stop_words)
 
 
 def load_term_to_code(file_path: str) -> Dict[str, Union[str, List[str]]]:

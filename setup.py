@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='term_matcher',  # Name of your package
-    version='0.2',        # Initial version
+    version='0.21',        # Initial version
     # Short description
     description='A library for fuzzy matching terms in text with corresponding codes.',
     # Long description from README.md
