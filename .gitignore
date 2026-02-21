@@ -1,5 +1,15 @@
 main.py
 
+# Node
+node_modules/
+package-lock.json
+
+# Claude Code session data
+.claude/
+
+# Large CSV data files (tracked separately)
+*.csv
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
